@@ -68,6 +68,17 @@ L'application est purement statique (HTML/CSS/JS), elle peut être servie par n'
 
 Le projet inclut un `Dockerfile` minimaliste basé sur `busybox`, qui sert les fichiers statiques via `busybox httpd` sous un utilisateur non‑root.
 
+```yaml
+services:
+  cryptyrus:
+    image: ghcr.io/debben80/cryptyrus:latest
+    container_name: cryptyrus
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    read_only: true
+```
+
 ---
 
 ## Sécurité
