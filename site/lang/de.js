@@ -50,6 +50,7 @@ window.CryptyrusLang.register("de", {
   "share.go.busy": "Aufteilung läuft…",
   "open.lead": "Scannen oder fügen Sie die Daten eines Blattes ein. Cryptyrus erkennt automatisch, ob es sich um ein <b>einzelnes Blatt</b> oder eine <b>Aufteilung</b> handelt, und fragt nach dem Fehlenden.",
   "scan.btn": "QR-Code scannen",
+  "scan.stop": "Scan abbrechen",
   "open.input.label": "Daten eines Blattes",
   "open.input.hint": "— einfügen, dann hinzufügen",
   "open.input.ph": "Fügen Sie hier den Inhalt des QR-Codes ein…",

@@ -50,6 +50,7 @@ window.CryptyrusLang.register("es", {
   "share.go.busy": "Repartiendo…",
   "open.lead": "Escanee o pegue los datos de una hoja. Cryptyrus reconoce automáticamente si es una <b>hoja única</b> o un <b>reparto</b>, y le pide lo que falta.",
   "scan.btn": "Escanear un código QR",
+  "scan.stop": "Cancelar escaneo",
   "open.input.label": "Datos de una hoja",
   "open.input.hint": "— pegue, luego añada",
   "open.input.ph": "Pegue aquí el contenido del código QR…",

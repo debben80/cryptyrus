@@ -50,6 +50,7 @@ window.CryptyrusLang.register("fr", {
   "share.go.busy": "Répartition en cours…",
   "open.lead": "Scannez ou collez les données d'une feuille. Cryptyrus reconnaît automatiquement s'il s'agit d'une <b>feuille unique</b> ou d'un <b>partage</b>, et vous demande ce qui manque.",
   "scan.btn": "Scanner un QR Code",
+  "scan.stop": "Annuler le scan",
   "open.input.label": "Données d'une feuille",
   "open.input.hint": "— collez, puis ajoutez",
   "open.input.ph": "Collez ici le contenu du QR Code…",

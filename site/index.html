@@ -410,6 +410,7 @@
       <div id="scanlib-error" class="banner b-warn" style="margin-top:14px"><span class="ico">&#9888;</span><span data-i18n-html="banner.scanlib">The file <b>html5-qrcode.min.js</b> is missing. Paste the data manually below.</span></div>
       <div id="camera-warning" class="banner b-warn" style="margin-top:14px"><span class="ico">&#9888;</span><span data-i18n="banner.camera">The camera was denied or is unavailable. Use image reading, or paste the data by hand.</span></div>
       <div id="reader"></div>
+      <button type="button" class="btn" id="btn-scan-stop" style="display:none;margin-top:12px" data-i18n="scan.stop">Cancel scan</button>
       <div class="field" style="margin-top:16px">
         <label for="o-input"><span data-i18n="open.input.label">One sheet's data</span> <span class="hint" data-i18n="open.input.hint">— paste, then add</span></label>
         <textarea id="o-input" rows="3" maxlength="12000" spellcheck="false" autocomplete="off" data-i18n-ph="open.input.ph" placeholder="Paste the QR code content here…"></textarea>
@@ -517,6 +518,7 @@
       "share.go.busy": "Splitting…",
       "open.lead": "Scan or paste one sheet's data. Cryptyrus automatically recognises whether it is a <b>single sheet</b> or a <b>split</b>, and asks for what's missing.",
       "scan.btn": "Scan a QR code",
+      "scan.stop": "Cancel scan",
       "open.input.label": "One sheet's data",
       "open.input.hint": "— paste, then add",
       "open.input.ph": "Paste the QR code content here…",
@@ -1487,22 +1489,56 @@
     }
 
     /* ---------------- Caméra ---------------- */
-    function onScanSuccess(text) {
-      if (scanner) scanner.clear().catch(() => {});
+    async function stopScanner() {
+      if (scanner) {
+        try { await scanner.stop(); } catch (_) {}
+        try { await scanner.clear(); } catch (_) {}
+      }
       scanner = null;
       $("reader").classList.remove("show");
-      showBanner("camera-warning", false);
+      $("btn-scan-stop").style.display = "none";
       $("btn-scan").style.display = "";
-      addCollected(text.trim());
     }
-    function startScanner() {
+
+    async function onScanSuccess(text) {
+      await stopScanner();
+      showBanner("camera-warning", false);
+      addCollected(text.trim());
+      if (navigator.vibrate) navigator.vibrate(80);
+    }
+
+    async function startScanner() {
       if (scanner) return;
-      if (typeof Html5QrcodeScanner === "undefined") return toast(t("toast.scanlib"), "bad");
+      if (typeof Html5Qrcode === "undefined") return toast(t("toast.scanlib"), "bad");
       if (!window.isSecureContext) { showBanner("insecure-warning", true); return toast(t("toast.https"), "bad"); }
+
+      showBanner("camera-warning", false);
       $("reader").classList.add("show");
       $("btn-scan").style.display = "none";
-      scanner = new Html5QrcodeScanner("reader", { fps: 8, qrbox: { width: 250, height: 250 }, rememberLastUsedCamera: false }, false);
-      scanner.render(onScanSuccess, () => {});
+      $("btn-scan-stop").style.display = "";
+
+      // qrbox responsive : 70% du plus petit côté du flux, borné à [160, 280]
+      const qrboxFn = (vw, vh) => {
+        const s = Math.max(160, Math.min(Math.floor(Math.min(vw, vh) * 0.7), 280));
+        return { width: s, height: s };
+      };
+
+      scanner = new Html5Qrcode("reader", { verbose: false });
+
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: qrboxFn, aspectRatio: 1 },
+          onScanSuccess,
+          () => {}           // échec par frame : ignoré
+        );
+      } catch (e) {
+        scanner = null;
+        $("reader").classList.remove("show");
+        $("btn-scan-stop").style.display = "none";
+        $("btn-scan").style.display = "";
+        showBanner("camera-warning", true);
+      }
     }
 
     function clearSensitive() {
@@ -1515,7 +1551,7 @@
     /* ---------------- Vérifications au démarrage ---------------- */
     function checkLibraries() {
       const qrOk = typeof QRCode !== "undefined" && typeof QRCode.CorrectLevel !== "undefined";
-      const scanOk = typeof Html5QrcodeScanner !== "undefined";
+      const scanOk = typeof Html5Qrcode !== "undefined";
       showBanner("qrlib-error", !qrOk);
       showBanner("scanlib-error", !scanOk);
       $("s-go").disabled = !qrOk; $("p-go").disabled = !qrOk; $("btn-scan").disabled = !scanOk;
@@ -1551,6 +1587,7 @@
     $("o-go").addEventListener("click", processOpen);
     $("o-clear").addEventListener("click", () => { clearOpen(); toast(t("toast.listCleared")); });
     $("btn-scan").addEventListener("click", startScanner);
+    $("btn-scan-stop").addEventListener("click", stopScanner);
     $("print-button").addEventListener("click", () => window.print());
     $("discard-button").addEventListener("click", () => { discardPreview(); toast(t("toast.discard")); });
     document.querySelectorAll(".pwd-toggle").forEach(btn => {

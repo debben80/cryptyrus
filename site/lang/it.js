@@ -50,6 +50,7 @@ window.CryptyrusLang.register("it", {
   "share.go.busy": "Suddivisione in corso…",
   "open.lead": "Scansiona o incolla i dati di un foglio. Cryptyrus riconosce automaticamente se si tratta di un <b>foglio singolo</b> o di una <b>suddivisione</b>, e chiede ciò che manca.",
   "scan.btn": "Scansiona un codice QR",
+  "scan.stop": "Annulla scansione",
   "open.input.label": "Dati di un foglio",
   "open.input.hint": "— incolla, poi aggiungi",
   "open.input.ph": "Incolla qui il contenuto del codice QR…",

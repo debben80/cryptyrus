@@ -50,6 +50,7 @@ window.CryptyrusLang.register("nl", {
   "share.go.busy": "Bezig met verdelen…",
   "open.lead": "Scan of plak de gegevens van één blad. Cryptyrus herkent automatisch of het een <b>enkel blad</b> of een <b>verdeling</b> is, en vraagt om wat ontbreekt.",
   "scan.btn": "Een QR-code scannen",
+  "scan.stop": "Scan annuleren",
   "open.input.label": "Gegevens van één blad",
   "open.input.hint": "— plakken, dan toevoegen",
   "open.input.ph": "Plak hier de inhoud van de QR-code…",
