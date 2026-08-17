@@ -266,50 +266,68 @@
       * { animation: none !important; transition: none !important; }
     }
 
-    /* ================= PRINTED SHEETS ================= */
+    /* ================= PRINTED SHEETS =================
+       Layout rules live OUTSIDE @media print so the hidden #sheets node can be
+       revealed off-screen (.measuring) and measured to guarantee a single page. */
     #sheets { display: none; }
+    .page { color: #000; font-family: system-ui, sans-serif; min-height: 277mm; display: flex; flex-direction: column; }
+    .sh-head { display: flex; align-items: flex-end; gap: 6mm; border-bottom: 1.2pt solid #000; padding-bottom: 2.5mm; margin-bottom: 4.5mm; }
+    .sh-head img { width: 20mm; height: auto; flex: none; }
+    .sh-brand { font-size: 12pt; font-weight: 800; letter-spacing: 1.5pt; text-transform: uppercase; }
+    .sh-desc { font-size: 21pt; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; margin-top: .8mm; }
+    .sh-stamp { margin-left: auto; text-align: right; font: 8pt/1.5 ui-monospace, Consolas, monospace; white-space: nowrap; }
+    .sh-stamp b { font-size: 10pt; letter-spacing: 1pt; }
+    .sh-part { display: inline-block; margin-top: 1mm; padding: 1mm 2.5mm; border: 1.2pt solid #000; font-size: 12pt; font-weight: 800; letter-spacing: .5pt; }
+    .sh-main { display: flex; gap: 3.5mm; align-items: flex-start; margin-bottom: 4.5mm; }
+    .sh-qr { flex: none; margin: 0; border: 1pt solid #000; padding: 3mm; text-align: center; }
+    .sh-qr img, .sh-qr canvas { display: block; width: 68mm !important; height: 68mm !important; image-rendering: pixelated; }
+    .sh-qr figcaption { font: 7pt/1.3 ui-monospace, Consolas, monospace; margin-top: 2mm; letter-spacing: .5pt; }
+    /* CRC printed directly under the QR (no dedicated frame anymore) */
+    .sh-qrcheck { margin-top: 2mm; padding-top: 2mm; border-top: .5pt solid #999; }
+    .sh-qrcheck span { display: block; font-size: 6.5pt; letter-spacing: 1.4pt; text-transform: uppercase; color: #444; }
+    .sh-qrcheck b { display: block; margin-top: .8mm; font: 10pt/1.4 ui-monospace, Consolas, monospace; font-weight: 700; letter-spacing: 1.2pt; }
+    /* Right column stretches to the QR frame height; its two boxes grow to fill
+       it evenly so the column ends level with the QR. */
+    .sh-side { flex: 1; align-self: stretch; display: flex; flex-direction: column; gap: 3.5mm; min-width: 0; }
+    /* Only "how to recover" grows to fill the column; the warning keeps its size. */
+    .sh-side > .sh-alert { flex: 0 0 auto; }
+    .sh-side > .sh-steps { flex: 1 1 auto; }
+    /* Unified section frames (model: QR payload) — every frame is a bordered
+       box with its header INSIDE (title 8pt + optional counter on the right),
+       no separator line, then the content. */
+    .sh-steps, .sh-payload-box, .sh-code-box { border: .8pt solid #000; padding: 3mm; }
+    .sh-fhead { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 2mm; }
+    .sh-fhead h2 { font-size: 8pt; letter-spacing: 1.6pt; text-transform: uppercase; margin: 0; }
+    .sh-fhead small { font-size: 7pt; color: #444; margin-left: auto; white-space: nowrap; }
+    .sh-payload-box p { margin: 2mm 0 0; font-size: 7.5pt; line-height: 1.4; color: #333; }
+    .sh-alert { border: .8pt solid #000; background: #ececec; padding: 3mm; font-size: 8.5pt; line-height: 1.4; }
+    .sh-alert b { display: block; margin-bottom: 1mm; font-size: 9pt; }
+    .sh-steps ol { margin: 0; padding-left: 5mm; font-size: 8.5pt; line-height: 1.45; }
+    .sh-steps li + li { margin-top: 1mm; }
+    .sh-steps code { font-family: ui-monospace, Consolas, monospace; font-weight: 700; }
+    .sh-steps p { margin: 2mm 0 0; font-size: 7.5pt; line-height: 1.4; color: #333; }
+    .sh-payload-box { margin-bottom: 4.5mm; }
+    .sh-payload { margin: 0; font-size: 8pt; font-family: ui-monospace, Consolas, "Courier New", monospace; line-height: 1.35; letter-spacing: .1pt; word-break: break-all; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .sh-code {
+      margin: 0;
+      white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all;
+      font-family: ui-monospace, Consolas, "Courier New", monospace;
+      line-height: 1.35; letter-spacing: .1pt;
+    }
+    .sh-foot { margin-top: auto; padding-top: 1.5mm; border-top: .5pt solid #999; font-size: 6.5pt; color: #333; display: flex; }
+    .sh-foot span:last-child { margin-left: auto; }
+    /* Off-screen measuring mode: reveal #sheets at the true printable width
+       (A4 210mm − 2×10mm margins = 190mm) so page height can be measured. */
+    #sheets.measuring { display: block !important; position: fixed; left: -100000px; top: 0; visibility: hidden; width: 190mm; }
+    #sheets.measuring .page { width: 190mm; min-height: 277mm; }
     @media print {
       @page { size: A4 portrait; margin: 10mm; }
       html, body { background: #fff !important; margin: 0; padding: 0; }
       body > *:not(#sheets) { display: none !important; }
-      #sheets { display: block !important; color: #000; font-family: system-ui, sans-serif; }
+      #sheets { display: block !important; }
       #sheets * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .page { break-after: page; page-break-after: always; }
+      .page { width: 190mm; break-after: page; page-break-after: always; }
       .page:last-child { break-after: auto; page-break-after: auto; }
-      .sh-head { display: flex; align-items: flex-end; gap: 6mm; border-bottom: 1.2pt solid #000; padding-bottom: 2.5mm; margin-bottom: 4.5mm; }
-      .sh-head img { width: 20mm; height: auto; flex: none; }
-      .sh-brand { font-size: 12pt; font-weight: 800; letter-spacing: 1.5pt; text-transform: uppercase; }
-      .sh-desc { font-size: 21pt; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; margin-top: .8mm; }
-      .sh-stamp { margin-left: auto; text-align: right; font: 8pt/1.5 ui-monospace, Consolas, monospace; white-space: nowrap; }
-      .sh-stamp b { font-size: 10pt; letter-spacing: 1pt; }
-      .sh-part { display: inline-block; margin-top: 1mm; padding: 1mm 2.5mm; border: 1.2pt solid #000; font-size: 12pt; font-weight: 800; letter-spacing: .5pt; }
-      .sh-main { display: flex; gap: 6mm; align-items: stretch; margin-bottom: 4.5mm; }
-      .sh-qr { flex: none; border: 1pt solid #000; padding: 3mm; text-align: center; }
-      .sh-qr img, .sh-qr canvas { display: block; width: 68mm !important; height: 68mm !important; image-rendering: pixelated; }
-      .sh-qr figcaption { font: 7pt/1.3 ui-monospace, Consolas, monospace; margin-top: 2mm; letter-spacing: .5pt; }
-      .sh-side { flex: 1; display: flex; flex-direction: column; gap: 3.5mm; min-width: 0; }
-      .sh-box { border: .8pt solid #000; padding: 3mm; }
-      .sh-box h2 { font-size: 7pt; letter-spacing: 1.6pt; text-transform: uppercase; margin: 0 0 2mm; padding-bottom: 1mm; border-bottom: .5pt solid #999; }
-      .sh-check { font: 11pt/1.6 ui-monospace, Consolas, monospace; font-weight: 700; letter-spacing: 1.5pt; }
-      .sh-box p { margin: 2mm 0 0; font-size: 7.5pt; line-height: 1.4; color: #333; }
-      .sh-alert { border: 1pt solid #000; background: #ececec; padding: 3mm; font-size: 8.5pt; line-height: 1.4; }
-      .sh-alert b { display: block; margin-bottom: 1mm; font-size: 9pt; }
-      .sh-steps { border: .8pt solid #000; padding: 3mm; margin-bottom: 4.5mm; }
-      .sh-steps h2 { font-size: 7pt; letter-spacing: 1.6pt; text-transform: uppercase; margin: 0 0 2mm; }
-      .sh-steps ol { margin: 0; padding-left: 5mm; font-size: 8.5pt; line-height: 1.45; }
-      .sh-steps li + li { margin-top: 1mm; }
-      .sh-steps code { font-family: ui-monospace, Consolas, monospace; font-weight: 700; }
-      .sh-code-head { display: flex; align-items: baseline; gap: 3mm; padding-bottom: 1.2mm; }
-      .sh-code-head h2 { font-size: 8pt; letter-spacing: 1.6pt; text-transform: uppercase; margin: 0; }
-      .sh-code-head small { font-size: 7pt; color: #444; margin-left: auto; }
-      .sh-code {
-        margin: 0; border: 1pt solid #000; padding: 3mm;
-        white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all;
-        font-family: ui-monospace, Consolas, "Courier New", monospace;
-        line-height: 1.35; letter-spacing: .1pt;
-      }
-      .sh-foot { margin-top: 3mm; padding-top: 1.5mm; border-top: .5pt solid #999; font-size: 6.5pt; color: #333; display: flex; }
-      .sh-foot span:last-child { margin-left: auto; }
     }
   </style>
 </head>
@@ -595,7 +613,6 @@
       "toast.open.pwd": "Enter the passphrase.",
       "toast.found": "Secret recovered.",
       "toast.listCleared": "List cleared.",
-      "toast.cleared": "Fields cleared.",
       "toast.sensitiveCleared": "Sensitive fields cleared.",
       "toast.langFail": "Language file not found, staying in English.",
       "result.working": "Working…",
@@ -626,14 +643,15 @@
       "sheet.alert.single.title": "Never write the passphrase on this sheet.",
       "sheet.alert.single.body": "Without it, this document is unusable. With it, it alone reveals the secret: keep it somewhere safe.",
       "sheet.check.title": "Checksum",
-      "sheet.check.note": "Only checks that the block below was copied without error. Does not help recover the secret.",
       "sheet.steps.title": "How to recover the secret",
-      "sheet.steps.share.1": "Gather {k} sheets of this split, including this one. Scan their QR codes with Cryptyrus, which reconstructs the secret without a password.",
-      "sheet.steps.share.2": "Without Cryptyrus: copy the block below into a file named recovery.html, open it in a browser, it will ask for the other parts.",
-      "sheet.steps.share.3": "The block is a single continuous line: a copy-paste from this document is enough, the visual line breaks are not part of the text.",
-      "sheet.steps.single.1": "Scan the QR code above with Cryptyrus, or copy the block below into a file named recovery.html.",
-      "sheet.steps.single.2": "The block is a single continuous line: a copy-paste from this document is enough, the visual line breaks are not part of the text.",
-      "sheet.steps.single.3": "Open this file in a recent browser. It works offline and asks for the passphrase as soon as it opens.",
+      "sheet.steps.share.1": "Easiest — gather {k} sheets of this split (including this one) and scan their QR codes with Cryptyrus. It works offline and rebuilds the secret without a password.",
+      "sheet.steps.share.2": "If a QR code is damaged or unreadable — retype the \u201cQR payload\u201d printed on that sheet into Cryptyrus instead of scanning it. It holds the exact same data.",
+      "sheet.steps.share.3": "Without Cryptyrus — save the recovery program below as a file named recovery.html, open it in a browser, and provide the other parts when asked. It is a single continuous line, so a plain copy-paste is enough; ignore the visual line breaks.",
+      "sheet.steps.single.1": "Easiest — scan the QR code above with Cryptyrus. It works offline, asks for your passphrase, then reveals the secret.",
+      "sheet.steps.single.2": "If the QR code is damaged or unreadable — retype the \u201cQR payload\u201d shown below into Cryptyrus. It holds the exact same data as the QR code.",
+      "sheet.steps.single.3": "If Cryptyrus is unavailable — save the recovery program below as a file named recovery.html and open it in a recent browser. It is a single continuous line, so a plain copy-paste is enough; ignore the visual line breaks.",
+      "sheet.payload.title": "QR payload",
+      "sheet.payload.info": "{n} characters",
       "sheet.code.title": "Standalone recovery program",
       "sheet.code.info": "{n} characters, single line",
       "sheet.foot.left": "Cryptyrus · local encryption · no data transmitted",
@@ -1126,9 +1144,58 @@
         image.addEventListener("error", () => { clearTimeout(timer); reject(new Error("QR")); }, { once: true });
       });
     }
-    function fitFont(length) {
-      const raw = Math.sqrt(88 / (length * 0.000548));
-      return Math.max(7, Math.min(12, Math.round(raw * 2) / 2));
+    // Pixels per millimetre in the current rendering, measured once and cached.
+    let _pxPerMm = 0;
+    function pxPerMm() {
+      if (_pxPerMm) return _pxPerMm;
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;left:-9999px;top:0;width:100mm;height:0";
+      document.body.appendChild(probe);
+      _pxPerMm = probe.getBoundingClientRect().width / 100;
+      probe.remove();
+      return _pxPerMm || 3.7795; // fallback ≈ 96dpi
+    }
+
+    // Guarantees a single printed page: measures the real height of the sheet at
+    // the printable width (190mm) and shrinks the variable-length blocks (payload
+    // + recovery program) until it fits within the printable height (277mm). If a
+    // huge secret still overflows at the minimum font, a uniform scale is applied
+    // as an ultimate safety net so the sheet can never spill onto a second page.
+    function fitPageToOnePage(built) {
+      const page = built.page;
+      const blocks = built.fitBlocks || [];
+      const sheets = document.getElementById("sheets");
+      const wasMeasuring = sheets.classList.contains("measuring");
+      sheets.classList.add("measuring");
+
+      // TOL absorbs sub-pixel rounding: the page now has min-height:277mm, so a
+      // short sheet measures ~MAX_H exactly and must NOT be treated as overflow.
+      const MAX_H = 277 * pxPerMm();   // A4 height (297mm) − top/bottom margins (2×10mm)
+      const TOL = 1;                   // ~1px slack
+      const START = 8, FLOOR = 5, STEP = 0.25;
+
+      page.style.transform = "";
+      page.style.width = "";
+      let font = START;
+      const apply = f => blocks.forEach(b => { b.style.fontSize = f + "pt"; });
+      apply(font);
+
+      // 1) Shrink the dense blocks together until the page fits.
+      while (font > FLOOR && page.getBoundingClientRect().height > MAX_H + TOL) {
+        font = Math.round((font - STEP) * 100) / 100;
+        apply(font);
+      }
+
+      // 2) Ultimate safety net: uniform scale if it still overflows.
+      const h = page.getBoundingClientRect().height;
+      if (h > MAX_H + TOL) {
+        const scale = Math.max(0.5, MAX_H / h);
+        page.style.transformOrigin = "top left";
+        page.style.transform = "scale(" + scale + ")";
+        page.style.width = (190 / scale) + "mm"; // keep the printed width at 190mm
+      }
+
+      if (!wasMeasuring) sheets.classList.remove("measuring");
     }
 
     /* ---------------- Construction des feuilles ---------------- */
@@ -1158,7 +1225,11 @@
       const caption = document.createElement("figcaption");
       caption.textContent = isShare ? t("sheet.caption.share", { i: s.partIndex, label: s.label })
                                      : t("sheet.caption.single", { label: s.label });
-      figure.append(qrHolder, caption);
+      const qrCheck = document.createElement("div"); qrCheck.className = "sh-qrcheck";
+      const qrCheckLabel = document.createElement("span"); qrCheckLabel.textContent = t("sheet.check.title");
+      const qrCheckValue = document.createElement("b"); qrCheckValue.textContent = s.check;
+      qrCheck.append(qrCheckLabel, qrCheckValue);
+      figure.append(qrHolder, caption, qrCheck);
 
       const side = document.createElement("div"); side.className = "sh-side";
       const alert = document.createElement("div"); alert.className = "sh-alert";
@@ -1170,16 +1241,10 @@
         alertTitle.textContent = t("sheet.alert.single.title");
         alert.append(alertTitle, document.createTextNode(t("sheet.alert.single.body")));
       }
-      const box = document.createElement("div"); box.className = "sh-box";
-      const boxTitle = document.createElement("h2"); boxTitle.textContent = t("sheet.check.title");
-      const checkLine = document.createElement("div"); checkLine.className = "sh-check"; checkLine.textContent = s.check;
-      const boxNote = document.createElement("p"); boxNote.textContent = t("sheet.check.note");
-      box.append(boxTitle, checkLine, boxNote);
-      side.append(alert, box);
-      main.append(figure, side);
-
       const steps = document.createElement("div"); steps.className = "sh-steps";
+      const stepsHead = document.createElement("div"); stepsHead.className = "sh-fhead";
       const stepsTitle = document.createElement("h2"); stepsTitle.textContent = t("sheet.steps.title");
+      stepsHead.append(stepsTitle);
       const list = document.createElement("ol");
       const keys = isShare
         ? ["sheet.steps.share.1", "sheet.steps.share.2", "sheet.steps.share.3"]
@@ -1189,23 +1254,37 @@
         item.textContent = t(key, { k: s.threshold });
         list.appendChild(item);
       }
-      steps.append(stepsTitle, list);
+      steps.append(stepsHead, list);
 
-      const codeHead = document.createElement("div"); codeHead.className = "sh-code-head";
+      // Right column beside the tall QR: warning + how-to-recover steps.
+      side.append(alert, steps);
+      main.append(figure, side);
+
+      const payloadBox = document.createElement("div"); payloadBox.className = "sh-payload-box";
+      const payHead = document.createElement("div"); payHead.className = "sh-fhead";
+      const payTitle = document.createElement("h2"); payTitle.textContent = t("sheet.payload.title");
+      const payInfo = document.createElement("small"); payInfo.textContent = t("sheet.payload.info", { n: s.qrText.length });
+      payHead.append(payTitle, payInfo);
+      const payText = document.createElement("div"); payText.className = "sh-payload"; payText.textContent = s.qrText;
+      payloadBox.append(payHead, payText);
+
+      const codeBox = document.createElement("div"); codeBox.className = "sh-code-box";
+      const codeHead = document.createElement("div"); codeHead.className = "sh-fhead";
       const codeTitle = document.createElement("h2"); codeTitle.textContent = t("sheet.code.title");
       const codeInfo = document.createElement("small"); codeInfo.textContent = t("sheet.code.info", { n: s.code.length });
       codeHead.append(codeTitle, codeInfo);
 
       const pre = document.createElement("pre"); pre.className = "sh-code";
-      pre.textContent = s.code; pre.style.fontSize = fitFont(s.code.length) + "pt";
+      pre.textContent = s.code;
+      codeBox.append(codeHead, pre);
 
       const foot = document.createElement("div"); foot.className = "sh-foot";
       const left = document.createElement("span"); left.textContent = t("sheet.foot.left");
       const right = document.createElement("span"); right.textContent = t("sheet.foot.date", { date: s.stamp });
       foot.append(left, right);
 
-      page.append(head, main, steps, codeHead, pre, foot);
-      return { page, qrHolder, qrText: s.qrText };
+      page.append(head, main, payloadBox, codeBox, foot);
+      return { page, qrHolder, qrText: s.qrText, fitBlocks: [payText, pre] };
     }
 
     async function showPreview(opts) {
@@ -1215,6 +1294,7 @@
         const built = buildSheet(sheet);
         container.appendChild(built.page);
         await renderQr(built.qrHolder, built.qrText, 760);
+        fitPageToOnePage(built);
         const thumb = document.createElement("figure"); thumb.className = "thumb";
         const frame = document.createElement("div"); frame.className = "qr-frame";
         const caption = document.createElement("figcaption");
