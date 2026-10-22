@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   release:
     types: [published]
-    
+
 permissions:
   contents: read
 
@@ -32,4 +32,49 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Run E2E and Standalone Tests
-        run: npx playwright test tests/cryptyrus.spec.mjs --browser=chromium
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+        run: npx playwright test tests/cryptyrus.spec.mjs --browser=chromium --reporter=list,github,json
+
+      - name: Generate Visual Test Summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            if (!fs.existsSync("results.json")) process.exit(0);
+            const data = JSON.parse(fs.readFileSync("results.json", "utf8"));
+            let passed = 0, failed = 0;
+            const rows = [];
+            const failures = [];
+
+            function walk(suites) {
+              for (const s of suites || []) {
+                for (const spec of s.specs || []) {
+                  const res = spec.tests[0]?.results[0];
+                  const ok = spec.ok;
+                  ok ? passed++ : failed++;
+                  const status = ok ? "✅ Pass" : "❌ Fail";
+                  const ms = res ? (res.duration / 1000).toFixed(2) + "s" : "-";
+                  const desc = spec.tests[0]?.annotations?.find(a => a.type === "description")?.description || "";
+                  rows.push(`| ${status} | **${spec.title}** \vert{}${desc} | \`${ms}\` |`);
+                  if (!ok && res) {
+                    const failedStep = (res.steps || []).find(st => st.error);
+                    const stepInfo = failedStep ? `Failed at step: **${failedStep.title}**\n\n` : "";
+                    const errMsg = (res.error?.message || "Unknown error").replace(/\x1b\[[0-9;]*m/g, "");
+                    failures.push(`### ❌ ${spec.title}\n${stepInfo}\`\`\`text\n${errMsg}\n\`\`\``);
+                  }
+                }
+                walk(s.suites);
+              }
+            }
+            walk(data.suites);
+
+            let md = `## 🛡️ Cryptyrus Test Report (${passed}/${passed + failed} passed)\n\n`;
+            md += `| Status | Test Case | Description | Duration |\n`;
+            md += `| :--- | :--- | :--- | :---: |\n`;
+            md += rows.join("\n") + "\n\n";
+            if (failures.length) {
+              md += `## 🔍 Failure Details\n\n` + failures.join("\n\n");
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          '
