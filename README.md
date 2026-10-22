@@ -30,7 +30,7 @@ Each printed sheet also embeds a **standalone recovery program** (self-contained
 - **Secret size control** (512 bytes recommended, 1,600 bytes maximum) with a real-time counter.
 - **Dedicated print layout** (one A4 sheet per QR code), featuring a standalone recovery script and control checksum.
 - **Light / Dark theme** (saved locally).
-- **Multilingual**: English embedded by default, with additional language packs (French, German, Dutch, Spanish) loaded dynamically.
+- **Multilingual**: English embedded by default, with additional language packs (French, German, Dutch, Spanish, ...) loaded dynamically.
 - **Privacy by design**: Strict Content-Security-Policy (`connect-src 'none'`), no network requests, no transmitted data.
 
 ---
@@ -39,14 +39,17 @@ Each printed sheet also embeds a **standalone recovery program** (self-contained
 
 ```text
 .
-├── index.html            # Main application (interface + logic)
-├── qrcode.min.js         # Local QR code generation library
-├── html5-qrcode.min.js   # Local camera QR code scanning library
-└── lang/                 # (Optional) Translation packs
-    ├── fr.js
-    ├── de.js
-    ├── nl.js
-    └── es.js
+├── site/
+│   ├── index.html           # Main application (interface + logic)
+│   ├── qrcode.min.js        # Local QR code generation library
+│   ├── html5-qrcode.min.js  # Local camera QR code scanning library
+│   └── lang/                # (Optional) Translation packs (fr, de, nl, es, ...)
+│       ├── fr.js
+│       ├── de.js
+│       ├── nl.js
+│       └── es.js
+├── tests/
+│   └── cryptyrus.spec.mjs   # Playwright E2E and unit test suite
 ```
 
 > The `qrcode.min.js` and `html5-qrcode.min.js` files must be present **in the same folder** as `index.html`: the application loads no remote dependencies (CSP `script-src 'self'`).
