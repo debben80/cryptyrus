@@ -86,6 +86,19 @@ services:
 
 ---
 
+## Automated Testing & CI/CD
+
+Cryptyrus features a robust end-to-end test suite built with **Playwright**, running automatically via **GitHub Actions** on every push, pull request, manual dispatch, or release publication.
+
+The test suite covers:
+- Security warnings and entropy confirmation dialogs.
+- Single-sheet (`QRS1 v1`) and Shamir split (`QRS1 v2`) full cycles.
+- Unicode NFC/NFD cross-platform passphrase normalization edge cases.
+- Standalone HTML recovery script execution (testing both single sheets and Shamir shares).
+- Light/Dark theme toggling.
+
+---
+
 ## Security
 
 - **Single sheet**: AES‑256‑GCM + PBKDF2 (SHA‑256, 600,000 iterations) — the passphrase is the sole protection for the secret.
