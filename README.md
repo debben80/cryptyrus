@@ -1,74 +1,74 @@
 [![Cryptyrus CI](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml/badge.svg)](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml)
 
-![Cryptyrus – bannière du projet](./docs/banner.png)
+![Cryptyrus – Project Banner](./docs/banner.png)
 
 # Cryptyrus
 
-**Chiffrement et sauvegarde physique sécurisée sur papier.**
-Tout se passe dans votre navigateur : aucune donnée (secret ou phrase de passe) ne quitte jamais l'appareil.
+**Encryption and secure physical backup on paper.**
+Everything happens in your browser: no data (secret or passphrase) ever leaves your device.
 
 ---
 
-## Présentation
+## Overview
 
-Cryptyrus est une application web **statique et autonome** (une seule page `index.html`) permettant de :
+Cryptyrus is a **static and autonomous** web application (a single `index.html` page) that allows you to:
 
-1. **Chiffrer un secret** (mots de passe, clés de récupération, informations sensibles…) et le matérialiser sous forme de **QR code imprimable**, protégé par une **phrase de passe**.
-2. **Répartir un secret** sur plusieurs feuilles grâce au **partage de secret de Shamir** (schéma *k-parmi-n*), sans phrase de passe : il faut réunir un nombre minimum de feuilles pour reconstituer le secret.
-3. **Récupérer un secret** en scannant un QR code (caméra) ou en collant les données manuellement.
+1. **Encrypt a secret** (passwords, recovery keys, sensitive data...) and render it as a **printable QR code**, protected by a **passphrase**.
+2. **Split a secret** across multiple sheets using **Shamir's Secret Sharing** (*k-of-n* scheme) without a passphrase: a minimum number of sheets must be gathered to reconstruct the secret.
+3. **Recover a secret** by scanning a QR code (via camera) or by pasting the data manually.
 
-Chaque feuille imprimée embarque également un **programme de récupération autonome** (HTML/JS auto-suffisant) permettant de retrouver le secret même sans accès à Cryptyrus, simplement en ouvrant le fichier dans un navigateur.
-
----
-
-## Fonctionnalités
-
-- **Chiffrement fort** : AES‑256‑GCM, dérivation de clé PBKDF2‑SHA‑256 (600 000 itérations).
-- **Partage de secret de Shamir** (GF(2⁸)) pour une répartition en *k parmi n* feuilles, sans mot de passe.
-- **Scan de QR code** via caméra (nécessite HTTPS) ou saisie manuelle des données.
-- **Estimateur d'entropie** de la phrase de passe avec estimation du temps de cassage.
-- **Contrôle de taille du secret** (512 octets recommandés, 1600 octets maximum) avec compteur en temps réel.
-- **Mise en page d'impression dédiée** (une feuille A4 par QR code), avec code de récupération autonome et checksum de contrôle.
-- **Thème clair / sombre** (mémorisé localement).
-- **Multilingue** : anglais embarqué par défaut, avec packs de langues additionnels (français, allemand, néerlandais, espagnol) chargés dynamiquement.
-- **Confidentialité par conception** : Content-Security-Policy stricte (`connect-src 'none'`), aucune requête réseau, aucune donnée transmise.
+Each printed sheet also embeds a **standalone recovery program** (self-contained HTML/JS) allowing you to retrieve the secret even without access to Cryptyrus, simply by opening the file in a browser.
 
 ---
 
-## Structure du projet
+## Features
 
-```
+- **Strong encryption**: AES‑256‑GCM, PBKDF2‑SHA‑256 key derivation (600,000 iterations).
+- **Shamir's Secret Sharing** (GF(2⁸)) for splitting into *k of n* sheets, with no password required.
+- **QR code scanning** via camera (requires HTTPS) or manual data entry.
+- **Passphrase entropy estimator** with estimated crack time.
+- **Secret size control** (512 bytes recommended, 1,600 bytes maximum) with a real-time counter.
+- **Dedicated print layout** (one A4 sheet per QR code), featuring a standalone recovery script and control checksum.
+- **Light / Dark theme** (saved locally).
+- **Multilingual**: English embedded by default, with additional language packs (French, German, Dutch, Spanish) loaded dynamically.
+- **Privacy by design**: Strict Content-Security-Policy (`connect-src 'none'`), no network requests, no transmitted data.
+
+---
+
+## Project Structure
+
+```text
 .
-├── index.html              # Application principale (interface + logique)
-├── qrcode.min.js            # Bibliothèque de génération de QR codes (locale)
-├── html5-qrcode.min.js       # Bibliothèque de scan de QR codes via caméra (locale)
-└── lang/                    # (optionnel) Packs de traduction
+├── index.html            # Main application (interface + logic)
+├── qrcode.min.js         # Local QR code generation library
+├── html5-qrcode.min.js   # Local camera QR code scanning library
+└── lang/                 # (Optional) Translation packs
     ├── fr.js
     ├── de.js
     ├── nl.js
     └── es.js
 ```
 
-> Les fichiers `qrcode.min.js` et `html5-qrcode.min.js` doivent être présents **dans le même dossier** que `index.html` : l'application ne charge aucune dépendance distante (CSP `script-src 'self'`).
+> The `qrcode.min.js` and `html5-qrcode.min.js` files must be present **in the same folder** as `index.html`: the application loads no remote dependencies (CSP `script-src 'self'`).
 
 ---
 
-## Utilisation
+## Usage
 
-1. Placez `index.html`, `qrcode.min.js` et `html5-qrcode.min.js` dans un même dossier (ajoutez éventuellement le dossier `lang/` pour les traductions).
-2. Ouvrez `index.html` dans un navigateur récent (idéalement servi en **HTTPS** si vous souhaitez utiliser le scan par caméra).
-3. Choisissez un onglet :
-   - **Feuille unique** : saisissez un libellé, le secret à protéger et une phrase de passe, puis générez et imprimez la feuille.
-   - **Répartition sur plusieurs feuilles** : définissez le nombre total de feuilles et le seuil requis, puis générez et imprimez les feuilles (à conserver dans des lieux distincts).
-   - **Récupérer un secret** : scannez ou collez les données d'une (ou plusieurs) feuille(s), puis saisissez la phrase de passe si nécessaire.
+1. Place `index.html`, `qrcode.min.js`, and `html5-qrcode.min.js` in the same folder (optionally add the `lang/` folder for translations).
+2. Open `index.html` in a modern browser (ideally served over **HTTPS** if you want to use camera scanning).
+3. Choose a tab:
+   - **Single sheet**: Enter a label, the secret to protect, and a passphrase, then generate and print the sheet.
+   - **Split across sheets**: Define the total number of sheets and the required threshold, then generate and print the sheets (store them in separate locations).
+   - **Recover a secret**: Scan or paste the data from one (or more) sheet(s), then enter the passphrase if required.
 
 ---
 
-## Déploiement
+## Deployment
 
-L'application est purement statique (HTML/CSS/JS), elle peut être servie par n'importe quel serveur web (Nginx, Apache, BusyBox httpd, etc.) ou hébergée en ligne. Le scan de QR code par caméra nécessite un contexte sécurisé (**HTTPS**) ; sans cela, la saisie manuelle des données reste disponible.
+The application is purely static (HTML/CSS/JS) and can be served by any web server (Nginx, Apache, BusyBox httpd, etc.) or hosted online. Camera QR code scanning requires a secure context (**HTTPS**); without it, manual data entry remains fully available.
 
-Le projet inclut un `Dockerfile` minimaliste basé sur `busybox`, qui sert les fichiers statiques via `busybox httpd` sous un utilisateur non‑root.
+The project includes a minimalist `Dockerfile` based on `busybox`, which serves static files via `busybox httpd` under a non-root user.
 
 ```yaml
 services:
@@ -83,10 +83,8 @@ services:
 
 ---
 
-## Sécurité
+## Security
 
-- **Feuille unique** : AES‑256‑GCM + PBKDF2 (SHA‑256, 600 000 itérations) — la phrase de passe est l'unique protection du secret.
-- **Répartition Shamir** : aucune phrase de passe n'est nécessaire, la sécurité repose sur la séparation physique des feuilles ; une seule feuille ne révèle rien.
-- Un **checksum** (empreinte SHA‑256 tronquée) est imprimé sur chaque feuille afin de vérifier qu'elle a été recopiée sans erreur — il ne permet en aucun cas de retrouver le secret.
-
----
+- **Single sheet**: AES‑256‑GCM + PBKDF2 (SHA‑256, 600,000 iterations) — the passphrase is the sole protection for the secret.
+- **Shamir split**: No passphrase is needed; security relies on the physical separation of the sheets; a single sheet reveals nothing.
+- A **checksum** (truncated SHA‑256 fingerprint) is printed on each sheet to verify it was copied without error — it cannot be used to retrieve the secret.
