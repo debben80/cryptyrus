@@ -1,3 +1,5 @@
+[![GitHub Release](https://img.shields.io/github/v/release/debben80/cryptyrus?include_prereleases&style=flat-square)](https://github.com/debben80/cryptyrus/releases)
+[![GitHub Pages Status](https://img.shields.io/github/actions/workflow/status/debben80/cryptyrus/pages.yml?label=pages&style=flat-square)](https://debben80.github.io/cryptyrus/)
 [![Cryptyrus CI](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml/badge.svg)](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml)
 
 ![Cryptyrus – Project Banner](./docs/banner.png)
