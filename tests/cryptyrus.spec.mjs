@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
+import fs from "node:fs";
+import os from "node:os";
 
 const INDEX_URL = "file://" + path.resolve("site/index.html");
 
@@ -132,7 +134,7 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
     });
 
     test("5. Standalone recovery program: Single Sheet", async ({ page }) => {
-        describeTest("Extracts the printed one-line HTML recovery script for a single sheet and executes it standalone.");
+        describeTest("Saves the printed one-line HTML recovery script as recovery.html, opens it in the browser, and decrypts the secret.");
 
         const secret = "standalone-secret-xyz-777";
         const password = "my-standalone-passphrase-2026";
@@ -153,21 +155,26 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
             expect(standaloneHtml).toContain("crypto.subtle");
         });
 
-        await test.step("Execute standalone HTML and supply passphrase via prompt()", async () => {
+        await test.step("Open recovery.html from disk and supply passphrase via prompt()", async () => {
+            const tmpFile = path.join(os.tmpdir(), `recovery-single-${Date.now()}.html`);
+            fs.writeFileSync(tmpFile, standaloneHtml, "utf8");
+
             page.once("dialog", async (dialog) => {
                 expect(dialog.type()).toBe("prompt");
                 await dialog.accept(password);
             });
-            await page.setContent(standaloneHtml, { waitUntil: "load" });
-            await page.evaluate(() => {
-                if (typeof window.onload === "function") window.onload();
-            });
-            await expect(page.locator("body")).toHaveText(secret);
+
+            try {
+                await page.goto("file://" + tmpFile);
+                await expect(page.locator("body")).toHaveText(secret);
+            } finally {
+                fs.rmSync(tmpFile, { force: true });
+            }
         });
     });
 
     test("6. Standalone recovery program: Shamir Share (2-of-2)", async ({ page }) => {
-        describeTest("Extracts the printed HTML recovery script from Share 1 and reconstructs the secret by prompting for Share 2.");
+        describeTest("Saves the printed HTML recovery script from Share 1 as recovery.html and reconstructs the secret by prompting for Share 2.");
 
         const secret = "shamir-standalone-secret-123";
         let payloads = [];
@@ -187,16 +194,21 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
             standaloneHtmlSheet1 = await page.locator(".sh-code").first().textContent();
         });
 
-        await test.step("Execute Share 1 standalone HTML and supply Share 2 via prompt()", async () => {
+        await test.step("Open Share 1 recovery.html from disk and supply Share 2 via prompt()", async () => {
+            const tmpFile = path.join(os.tmpdir(), `recovery-share-${Date.now()}.html`);
+            fs.writeFileSync(tmpFile, standaloneHtmlSheet1, "utf8");
+
             page.once("dialog", async (dialog) => {
                 expect(dialog.type()).toBe("prompt");
                 await dialog.accept(payloads[1]);
             });
-            await page.setContent(standaloneHtmlSheet1, { waitUntil: "load" });
-            await page.evaluate(() => {
-                if (typeof window.onload === "function") window.onload();
-            });
-            await expect(page.locator("body")).toHaveText(secret);
+
+            try {
+                await page.goto("file://" + tmpFile);
+                await expect(page.locator("body")).toHaveText(secret);
+            } finally {
+                fs.rmSync(tmpFile, { force: true });
+            }
         });
     });
 
