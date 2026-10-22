@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
 
-const INDEX_URL = "file://" + path.resolve("index.html");
+const INDEX_URL = "file://" + path.resolve("site/index.html");
 
 test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
 
