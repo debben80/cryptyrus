@@ -1,3 +1,5 @@
+[![Cryptyrus CI](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml/badge.svg)](https://github.com/debben80/cryptyrus/actions/workflows/tests.yml)
+
 ![Cryptyrus – bannière du projet](./docs/banner.png)
 
 # Cryptyrus
