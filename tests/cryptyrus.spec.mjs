@@ -8,10 +8,10 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
     test("1. Security warnings & entropy confirmation dialog", async ({ page }) => {
         await page.goto(INDEX_URL);
 
-        // Attempt encryption with a weak passphrase (< 60 bits)
+        // 12+ characters required to pass MIN_PASSWORD_CHARS, but low entropy (< 60 bits)
         await page.fill("#s-desc", "Warning Test");
         await page.fill("#s-secret", "my-secret-data");
-        await page.fill("#s-pwd", "password123");
+        await page.fill("#s-pwd", "password1234");
         await page.click("#s-go");
 
         // Verify confirmation modal appears
@@ -143,13 +143,17 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
         expect(standaloneHtml).toContain("crypto.subtle");
 
         // Handle prompt dialog triggered by standalone script
-        page.on("dialog", async (dialog) => {
+        page.once("dialog", async (dialog) => {
             expect(dialog.type()).toBe("prompt");
             await dialog.accept(password);
         });
 
-        // Load standalone recovery script via data URI
-        await page.goto("data:text/html;charset=utf-8," + encodeURIComponent(standaloneHtml));
+        // Use setContent to preserve the page's secure context (crypto.subtle)
+        // and dispatch load event if onload was attached after initial load
+        await page.setContent(standaloneHtml, { waitUntil: "load" });
+        await page.evaluate(() => {
+            if (typeof window.onload === "function") window.onload();
+        });
 
         await expect(page.locator("body")).toHaveText(secret);
     });
@@ -170,12 +174,15 @@ test.describe("Cryptyrus — Functional & Standalone Recovery Tests", () => {
         const payloads = await page.locator("#sheets .sh-payload").allTextContents();
         const standaloneHtmlSheet1 = await page.locator(".sh-code").first().textContent();
 
-        page.on("dialog", async (dialog) => {
+        page.once("dialog", async (dialog) => {
             expect(dialog.type()).toBe("prompt");
             await dialog.accept(payloads[1]); // Provide missing part 2
         });
 
-        await page.goto("data:text/html;charset=utf-8," + encodeURIComponent(standaloneHtmlSheet1));
+        await page.setContent(standaloneHtmlSheet1, { waitUntil: "load" });
+        await page.evaluate(() => {
+            if (typeof window.onload === "function") window.onload();
+        });
 
         await expect(page.locator("body")).toHaveText(secret);
     });
